@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Entity\Emprunt;
+use App\Form\ChangePasswordFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -100,5 +102,64 @@ class UserAccountController extends AbstractController
 
         $this->addFlash('success', 'Livre "<strong>' . $emprunt->getLivre()->getTitre() . '</strong>" rendu avec succès ! Merci !');
         return $this->redirectToRoute('app_user_emprunts');
+    }
+
+    #[Route('/profile', name: 'app_user_profile')]
+    public function profile(): Response
+    {
+        $user = $this->getUser();
+
+        return $this->render('user_account/profile.html.twig', [
+            'user' => $user,
+        ]);
+    }
+
+    #[Route('/change-password', name: 'app_user_change_password', methods: ['GET', 'POST'])]
+    public function changePassword(
+        Request $request,
+        UserPasswordHasherInterface $passwordHasher,
+        EntityManagerInterface $em
+    ): Response {
+        $user = $this->getUser();
+        $form = $this->createForm(ChangePasswordFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            // Verify current password
+            if (!$passwordHasher->isPasswordValid($user, $data['currentPassword'])) {
+                $this->addFlash('danger', 'Le mot de passe actuel est incorrect.');
+                return $this->redirectToRoute('app_user_change_password');
+            }
+
+            // Check if new password matches confirmation
+            if ($data['plainPassword'] !== $data['confirmPassword']) {
+                $this->addFlash('danger', 'Les nouveaux mots de passe ne correspondent pas.');
+                return $this->redirectToRoute('app_user_change_password');
+            }
+
+            // Check if new password is the same as current password
+            if ($passwordHasher->isPasswordValid($user, $data['plainPassword'])) {
+                $this->addFlash('warning', 'Le nouveau mot de passe doit être différent du mot de passe actuel.');
+                return $this->redirectToRoute('app_user_change_password');
+            }
+
+            // Hash and set new password
+            $hashedPassword = $passwordHasher->hashPassword($user, $data['plainPassword']);
+            $user->setPassword($hashedPassword);
+            $em->flush();
+
+            $this->logger->info('User changed password', [
+                'user' => $user->getEmail()
+            ]);
+
+            $this->addFlash('success', 'Mot de passe changé avec succès !');
+            return $this->redirectToRoute('app_user_profile');
+        }
+
+        return $this->render('user_account/change_password.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 }

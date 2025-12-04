@@ -176,4 +176,35 @@ class NotificationService
         $diff = $dueDate->diff($now);
         return (int)$diff->format('%a');
     }
+
+    /**
+     * Send password reset email
+     */
+    public function sendPasswordResetEmail(Utilisateur $user, string $resetUrl): bool
+    {
+        try {
+            $html = $this->twig->render('emails/password_reset.html.twig', [
+                'user' => $user,
+                'resetUrl' => $resetUrl,
+            ]);
+
+            $email = (new Email())
+                ->from($this->senderEmail)
+                ->to($user->getEmail())
+                ->subject('🔐 Réinitialiser votre mot de passe')
+                ->html($html);
+
+            $this->mailer->send($email);
+            $this->logger->info('Password reset email sent', [
+                'user' => $user->getEmail()
+            ]);
+            return true;
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to send password reset email', [
+                'error' => $e->getMessage(),
+                'user' => $user->getEmail()
+            ]);
+            return false;
+        }
+    }
 }

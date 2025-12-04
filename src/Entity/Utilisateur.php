@@ -37,8 +37,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Password is required')]
-    #[Assert\Length(min: 8, minMessage: 'Password must be at least {{ limit }} characters')]
     private ?string $password = null;
 
     /**
@@ -89,6 +87,12 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\OneToMany(targetEntity: Avis::class, mappedBy: 'utilisateur', cascade: ['remove'])]
     private Collection $avis;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $resetToken = null;
+
+    #[ORM\Column(type: \Doctrine\DBAL\Types\Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $resetTokenExpiredAt = null;
 
     public function __construct()
     {
@@ -485,5 +489,34 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this->createdAt->format('d/m/Y');
+    }
+
+    public function getResetToken(): ?string
+    {
+        return $this->resetToken;
+    }
+
+    public function setResetToken(?string $resetToken): static
+    {
+        $this->resetToken = $resetToken;
+
+        return $this;
+    }
+
+    public function getResetTokenExpiredAt(): ?\DateTimeImmutable
+    {
+        return $this->resetTokenExpiredAt;
+    }
+
+    public function setResetTokenExpiredAt(?\DateTimeImmutable $resetTokenExpiredAt): static
+    {
+        $this->resetTokenExpiredAt = $resetTokenExpiredAt;
+
+        return $this;
+    }
+
+    public function isResetTokenValid(): bool
+    {
+        return $this->resetToken !== null && $this->resetTokenExpiredAt !== null && $this->resetTokenExpiredAt > new \DateTimeImmutable();
     }
 }

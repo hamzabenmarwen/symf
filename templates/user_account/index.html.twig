@@ -77,10 +77,6 @@
                                         <small class="text-muted">({{ app.user.memberSinceDays }} jours)</small>
                                     </span>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between py-3 px-0">
-                                    <span class="fw-medium">ID :</span>
-                                    <span class="text-muted font-monospace">#{{ app.user.id }}</span>
-                                </li>
                             </ul>
                         </div>
 
@@ -179,17 +175,22 @@
 
                     {# Quick Actions #}
                     <div class="row g-3 mb-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <a href="{{ path('app_user_profile') }}" class="btn btn-warning w-100">
+                                <i class="fas fa-cog"></i> Profil
+                            </a>
+                        </div>
+                        <div class="col-md-3">
                             <a href="{{ path('app_user_emprunts') }}" class="btn btn-primary w-100">
-                                <i class="fas fa-book-open"></i> Mes emprunts
+                                <i class="fas fa-book-open"></i> Emprunts
                             </a>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <a href="{{ path('app_user_wishlist') }}" class="btn btn-outline-primary w-100">
-                                <i class="fas fa-heart"></i> Ma liste de souhaits
+                                <i class="fas fa-heart"></i> Souhaits
                             </a>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <a href="{{ path('app_user_catalog') }}" class="btn btn-outline-primary w-100">
                                 <i class="fas fa-search"></i> Parcourir
                             </a>

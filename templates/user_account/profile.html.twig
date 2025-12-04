@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil - Bibliothèque{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h1 class="mb-4">Mon Profil</h1>
+
+            {% if app.flashes %}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'danger' ? 'danger' : (type == 'warning' ? 'warning' : 'success') }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            {% endif %}
+
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Informations du compte</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Email :</strong></p>
+                            <p>{{ app.user.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Prénom :</strong></p>
+                            <p>{{ app.user.firstName ?: '<em class="text-muted">Non renseigné</em>'|raw }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Nom :</strong></p>
+                            <p>{{ app.user.lastName ?: '<em class="text-muted">Non renseigné</em>'|raw }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Membre depuis :</strong></p>
+                            <p>{{ app.user.createdAt ? app.user.createdAt|date('d/m/Y') : 'Inconnu' }}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Statut du compte :</strong></p>
+                            <span class="badge bg-success">Actif</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Sécurité</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Gérez les paramètres de sécurité de votre compte.</p>
+                    <a href="{{ path('app_user_change_password') }}" class="btn btn-primary">
+                        <i class="fas fa-lock"></i> Changer le mot de passe
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Liens rapides</h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ path('app_user_emprunts') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-book"></i> Mes emprunts
+                    </a>
+                    <a href="{{ path('app_user_catalog') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-search"></i> Parcourir les livres
+                    </a>
+                    <a href="{{ path('app_user_wishlist') }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-heart"></i> Ma liste de souhaits
+                    </a>
+                    <a href="{{ path('app_logout') }}" class="list-group-item list-group-item-action text-danger">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

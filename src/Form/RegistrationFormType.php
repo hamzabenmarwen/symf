@@ -22,70 +22,95 @@ class RegistrationFormType extends AbstractType
     {
         $builder
             ->add('email', EmailType::class, [
+                'label' => 'Email',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'votre@email.com',
+                ],
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter an email',
+                        'message' => 'Veuillez entrer un email',
                     ]),
                     new Email([
-                        'message' => 'Please enter a valid email address',
+                        'message' => 'Veuillez entrer une adresse email valide',
                     ]),
                     new Length([
                         'max' => 180,
-                        'maxMessage' => 'Email must be less than {{ limit }} characters',
+                        'maxMessage' => 'Email doit contenir moins de {{ limit }} caractères',
                     ]),
                 ],
             ])
             ->add('firstName', TextType::class, [
-                'label' => 'First Name',
-                'required' => false,
+                'label' => 'Prénom',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Votre prénom',
+                ],
+                'required' => true,
                 'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez entrer votre prénom',
+                    ]),
                     new Length([
                         'max' => 255,
-                        'maxMessage' => 'First name must be less than {{ limit }} characters',
+                        'maxMessage' => 'Prénom doit contenir moins de {{ limit }} caractères',
                     ]),
                     new Regex([
-                        'pattern' => '/^[a-zA-Z\s\-\']*$/',
-                        'message' => 'First name can only contain letters, spaces, hyphens and apostrophes',
+                        'pattern' => '/^[a-zA-ZÀ-ÿ\s\-\']*$/',
+                        'message' => 'Prénom peut contenir seulement des lettres, espaces, tirets et apostrophes',
                     ]),
                 ],
             ])
             ->add('lastName', TextType::class, [
-                'label' => 'Last Name',
-                'required' => false,
+                'label' => 'Nom',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Votre nom',
+                ],
+                'required' => true,
                 'constraints' => [
+                    new NotBlank([
+                        'message' => 'Veuillez entrer votre nom',
+                    ]),
                     new Length([
                         'max' => 255,
-                        'maxMessage' => 'Last name must be less than {{ limit }} characters',
+                        'maxMessage' => 'Nom doit contenir moins de {{ limit }} caractères',
                     ]),
                     new Regex([
-                        'pattern' => '/^[a-zA-Z\s\-\']*$/',
-                        'message' => 'Last name can only contain letters, spaces, hyphens and apostrophes',
+                        'pattern' => '/^[a-zA-ZÀ-ÿ\s\-\']*$/',
+                        'message' => 'Nom peut contenir seulement des lettres, espaces, tirets et apostrophes',
                     ]),
                 ],
             ])
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
+                'label' => 'Accepter les conditions d\'utilisation',
                 'constraints' => [
                     new IsTrue([
-                        'message' => 'You must agree to our terms and conditions',
+                        'message' => 'Vous devez accepter nos conditions d\'utilisation',
                     ]),
                 ],
             ])
             ->add('plainPassword', PasswordType::class, [
                 'mapped' => false,
-                'attr' => ['autocomplete' => 'new-password'],
+                'label' => 'Mot de passe',
+                'attr' => [
+                    'autocomplete' => 'new-password',
+                    'class' => 'form-control',
+                    'placeholder' => 'Entrez un mot de passe sécurisé',
+                ],
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Please enter a password',
+                        'message' => 'Veuillez entrer un mot de passe',
                     ]),
                     new Length([
                         'min' => 8,
-                        'minMessage' => 'Your password should be at least {{ limit }} characters',
+                        'minMessage' => 'Votre mot de passe doit contenir au moins {{ limit }} caractères',
                         'max' => 4096,
                     ]),
                     new Regex([
                         'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/',
-                        'message' => 'Password must contain at least one uppercase letter, one lowercase letter, and one digit',
+                        'message' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre',
                     ]),
                 ],
             ])
