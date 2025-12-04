@@ -1,0 +1,56 @@
+{# templates/home/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="hero text-center text-white">
+    <div class="container">
+        <h1 class="display-2 fw-bold mb-4">Bienvenue à la Bibliothèque</h1>
+        <p class="lead fs-3 mb-5 opacity-90">Découvrez des milliers d’ouvrages, romans, essais et bien plus encore.</p>
+
+        <div class="d-flex flex-column flex-lg-row gap-4 justify-content-center">
+            <a href="{{ path('app_user_catalog') }}" class="btn btn-light btn-lg px-5 shadow-lg">
+                Parcourir le Catalogue
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <h2 class="text-center mb-5 display-5 text-primary">Nouveautés</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-5">
+        {% for livre in livres %}
+            <div class="col">
+                <div class="card h-100 shadow-lg">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-primary">{{ livre.titre }}</h5>
+                        <p class="text-muted small">
+                            par {{ livre.auteurs|map(a => a.nom)|join(', ') ?: 'Auteur inconnu' }}
+                        </p>
+                        <div class="mt-auto">
+                            <p class="h4 text-success fw-bold">{{ livre.prixunitaire|number_format(0) }} DT</p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-muted">Stock:</span>
+                                {% if livre.qte > 0 %}
+                                    <span class="badge bg-success fs-6">{{ livre.qte }} ex.</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Épuisé</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ path('app_user_livre_detail', {id: livre.id}) }}"
+                               class="btn btn-outline-primary w-100">Voir le livre</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center text-muted fs-4">Aucun livre pour le moment.</p>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="{{ path('app_user_catalog') }}" class="btn btn-lg btn-primary px-5">
+            Voir tout le catalogue →
+        </a>
+    </div>
+</div>
+{% endblock %}

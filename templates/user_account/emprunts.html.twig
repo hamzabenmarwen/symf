@@ -1,0 +1,211 @@
+{# templates/user_account/emprunts.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Emprunts - Bibliothèque{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">
+            <i class="fas fa-home"></i> Accueil
+        </a>
+        <a href="{{ path('app_user_catalog') }}" class="btn btn-outline-primary ms-2">
+            <i class="fas fa-book"></i> Catalogue
+        </a>
+    </div>
+
+    <h1 class="text-center display-5 fw-bold mb-5">
+        <i class="fas fa-book-reader text-primary"></i> Mes Emprunts
+    </h1>
+
+    {# EMPRUNTS EN COURS #}
+    <div class="card shadow-lg mb-5">
+        <div class="card-header">
+            <h3 class="mb-0 d-flex gap-3 align-items-center">
+                <i class="fas fa-clock"></i> Emprunts en cours
+                <span class="badge bg-light text-primary fs-6">{{ empruntsEnCours|length }}</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            {% if empruntsEnCours is empty %}
+                <div class="alert alert-info text-center m-0">
+                    <i class="fas fa-info-circle fa-2x mb-2"></i>
+                    <p class="mb-0 fs-5">Vous n'avez aucun emprunt en cours</p>
+                    <a href="{{ path('app_user_catalog') }}" class="btn btn-primary btn-sm mt-3">
+                        <i class="fas fa-book"></i> Parcourir le catalogue
+                    </a>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Livre</th>
+                                <th>Date d'emprunt</th>
+                                <th>À rendre avant</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emprunt in empruntsEnCours %}
+                                {% set now = date() %}
+                                {% set dateRetour = date(emprunt.dateRetourPrevue) %}
+                                {% set diff = now.diff(dateRetour) %}
+                                {% set joursRestants = diff.days %}
+                                {% set enRetard = now > dateRetour %}
+                                
+                                <tr class="{% if enRetard %}table-danger{% elseif joursRestants <= 3 %}table-warning{% endif %}">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="bg-primary text-white rounded p-2">
+                                                <i class="fas fa-book fa-lg"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="d-block">{{ emprunt.livre.titre }}</strong>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-user"></i> {{ emprunt.livre.auteurs|map(a => a.nom)|join(', ') }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-calendar-alt text-muted"></i>
+                                        {{ emprunt.dateEmprunt|date('d/m/Y') }}
+                                    </td>
+                                    <td>
+                                        <strong class="{% if enRetard %}text-danger fw-bold{% endif %}">
+                                            <i class="fas fa-calendar-check"></i>
+                                            {{ emprunt.dateRetourPrevue|date('d/m/Y') }}
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        {% if enRetard %}
+                                            <span class="badge bg-danger fs-6">
+                                                <i class="fas fa-exclamation-triangle"></i> 
+                                                EN RETARD de {{ joursRestants|abs }} jour{{ joursRestants|abs > 1 ? 's' : '' }}
+                                            </span>
+                                        {% elseif joursRestants == 0 %}
+                                            <span class="badge bg-warning text-dark fs-6">
+                                                <i class="fas fa-clock"></i> À rendre AUJOURD'HUI
+                                            </span>
+                                        {% elseif joursRestants <= 3 %}
+                                            <span class="badge bg-warning text-dark fs-6">
+                                                <i class="fas fa-hourglass-half"></i> 
+                                                {{ joursRestants }} jour{{ joursRestants > 1 ? 's' : '' }} restant{{ joursRestants > 1 ? 's' : '' }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success fs-6">
+                                                <i class="fas fa-check"></i> 
+                                                {{ joursRestants }} jours restants
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <form method="post" action="{{ path('app_user_emprunt_rendre', {id: emprunt.id}) }}" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('rendre-' ~ emprunt.id) }}">
+                                            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Confirmer le retour de ce livre ?')">
+                                                <i class="fas fa-undo"></i> Rendre
+                                            </button>
+                                        </form>
+                                        <a href="{{ path('app_user_livre_detail', {id: emprunt.livre.id}) }}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Alerte pour les retards #}
+                {% set nbRetards = 0 %}
+                {% for emprunt in empruntsEnCours %}
+                    {% if date() > date(emprunt.dateRetourPrevue) %}
+                        {% set nbRetards = nbRetards + 1 %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if nbRetards > 0 %}
+                    <div class="alert alert-danger mt-3 mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Attention !</strong> Vous avez {{ nbRetards }} livre{{ nbRetards > 1 ? 's' : '' }} en retard. Veuillez les retourner rapidement.
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    {# HISTORIQUE #}
+    <div class="card shadow-lg">
+        <div class="card-header bg-secondary text-white">
+            <h3 class="mb-0 d-flex gap-3 align-items-center">
+                <i class="fas fa-history"></i> Historique des emprunts
+                <span class="badge bg-light text-secondary fs-6">{{ historique|length }}</span>
+            </h3>
+        </div>
+        <div class="card-body">
+            {% if historique is empty %}
+                <div class="alert alert-info text-center m-0">
+                    <i class="fas fa-info-circle"></i> Aucun historique d'emprunt
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Livre</th>
+                                <th>Date d'emprunt</th>
+                                <th>À retourner avant</th>
+                                <th>Date de retour</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emprunt in historique %}
+                                {% set etaitEnRetard = emprunt.dateRetourEffective > emprunt.dateRetourPrevue %}
+                                {% set joursRetard = etaitEnRetard ? date(emprunt.dateRetourPrevue).diff(date(emprunt.dateRetourEffective)).days : 0 %}
+                                
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="bg-secondary text-white rounded p-2">
+                                                <i class="fas fa-book"></i>
+                                            </div>
+                                            <div>
+                                                <strong class="d-block">{{ emprunt.livre.titre }}</strong>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-user"></i> {{ emprunt.livre.auteurs|map(a => a.nom)|join(', ') }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><i class="fas fa-calendar-alt text-muted me-1"></i> {{ emprunt.dateEmprunt|date('d/m/Y') }}</td>
+                                    <td><i class="fas fa-calendar-check text-muted me-1"></i> {{ emprunt.dateRetourPrevue|date('d/m/Y') }}</td>
+                                    <td>
+                                        <strong class="{% if etaitEnRetard %}text-danger{% else %}text-success{% endif %}">
+                                            {{ emprunt.dateRetourEffective|date('d/m/Y') }}
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        {% if etaitEnRetard %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-exclamation"></i> 
+                                                Retard de {{ joursRetard }} jour{{ joursRetard > 1 ? 's' : '' }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check"></i> À temps
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ma Liste de Souhaits - Bibliothèque{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <h1 class="display-5 text-primary mb-5">
+        <i class="fas fa-heart"></i> Ma Liste de Souhaits
+    </h1>
+
+    {% if wishlists|length > 0 %}
+        <div class="row g-4">
+            {% for wishlist in wishlists %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-primary">{{ wishlist.livre.titre }}</h5>
+                            <p class="text-muted small mb-2">
+                                <strong>Auteur(s):</strong><br>
+                                {{ wishlist.livre.auteurs|map(a => a.nom)|join(', ') ?: 'Non spécifié' }}
+                            </p>
+                            <p class="text-muted small">
+                                <strong>Catégorie:</strong> {{ wishlist.livre.no.designation }}
+                            </p>
+
+                            {% if wishlist.livre.averageRating %}
+                                <div class="mb-2">
+                                    <small class="text-warning">
+                                        {% for i in 1..5 %}
+                                            {% if i <= wishlist.livre.averageRating %}
+                                                <i class="fas fa-star"></i>
+                                            {% else %}
+                                                <i class="far fa-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        ({{ wishlist.livre.ratingCount }})
+                                    </small>
+                                </div>
+                            {% endif %}
+
+                            <div class="mt-auto pt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="h5 text-success fw-bold">{{ wishlist.livre.prixunitaire|number_format(0) }} DT</span>
+                                    {% if wishlist.livre.qte > 0 %}
+                                        <span class="badge bg-success">Disponible</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Épuisé</span>
+                                    {% endif %}
+                                </div>
+
+                                <a href="{{ path('app_user_livre_detail', {id: wishlist.livre.id}) }}" 
+                                   class="btn btn-primary btn-sm w-100 mb-2">
+                                    <i class="fas fa-eye"></i> Voir le livre
+                                </a>
+
+                                <form method="POST" action="{{ path('app_livre_wishlist_remove', {id: wishlist.livre.id}) }}" style="display: inline-block; width: 100%;">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('wishlist-remove-' ~ wishlist.livre.id) }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100" onclick="return confirm('Êtes-vous sûr?')">
+                                        <i class="fas fa-trash"></i> Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <h5><i class="fas fa-info-circle"></i> Votre liste de souhaits est vide</h5>
+            <p class="mb-3">Vous n'avez pas encore ajouté de livres à votre liste de souhaits.</p>
+            <a href="{{ path('app_user_catalog') }}" class="btn btn-primary">
+                <i class="fas fa-book"></i> Parcourir le catalogue
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

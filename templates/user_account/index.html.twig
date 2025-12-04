@@ -1,0 +1,220 @@
+{# templates/user_account/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Compte - Bibliothèque{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {# Header #}
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-user-circle text-primary"></i> Mon Compte
+                </h1>
+                <p class="lead text-muted">
+                    Bienvenue, <strong class="text-primary">{{ app.user.firstName ?: app.user.email }}</strong>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <span class="badge bg-danger ms-3">
+                            <i class="fas fa-shield-alt"></i> Administrateur
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+
+            {# Member Status Badge #}
+            {% set memberStatus = app.user.memberStatus %}
+            <div class="text-center mb-5">
+                <div>
+                    {% if memberStatus == 'power-user' %}
+                        <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 14px;">
+                            <i class="fas fa-crown"></i> Membre Premium
+                        </span>
+                    {% elseif memberStatus == 'active' %}
+                        <span class="badge bg-success px-3 py-2" style="font-size: 14px;">
+                            <i class="fas fa-star"></i> Membre Actif
+                        </span>
+                    {% else %}
+                        <span class="badge bg-info px-3 py-2" style="font-size: 14px;">
+                            <i class="fas fa-user-check"></i> Membre
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Main Content Card #}
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-primary text-white text-center py-4">
+                    <h3 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Informations du compte
+                    </h3>
+                </div>
+                <div class="card-body p-5">
+                    {# Profile Info & Statistics Grid #}
+                    <div class="row g-4 mb-5">
+                        {# Profile Details #}
+                        <div class="col-md-6">
+                            <h5 class="text-primary fw-bold mb-4">
+                                <i class="fas fa-id-card"></i> Détails du profil
+                            </h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between py-3 px-0">
+                                    <span class="fw-medium">Email :</span>
+                                    <strong>{{ app.user.email }}</strong>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between py-3 px-0">
+                                    <span class="fw-medium">Prénom :</span>
+                                    <span>{{ app.user.firstName ?: '<em class="text-muted">Non renseigné</em>'|raw }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between py-3 px-0">
+                                    <span class="fw-medium">Nom :</span>
+                                    <span>{{ app.user.lastName ?: '<em class="text-muted">Non renseigné</em>'|raw }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between py-3 px-0">
+                                    <span class="fw-medium">Membre depuis :</span>
+                                    <span title="{{app.user.createdAt|date('Y-m-d H:i:s')}}">
+                                        {{ app.user.formattedCreatedAt }} 
+                                        <small class="text-muted">({{ app.user.memberSinceDays }} jours)</small>
+                                    </span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between py-3 px-0">
+                                    <span class="fw-medium">ID :</span>
+                                    <span class="text-muted font-monospace">#{{ app.user.id }}</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {# Statistics Cards #}
+                        <div class="col-md-6">
+                            <h5 class="text-primary fw-bold mb-4">
+                                <i class="fas fa-chart-bar"></i> Mes statistiques
+                            </h5>
+                            <div class="row g-3">
+                                {# Total Borrowings #}
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light rounded-lg shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="display-6 fw-bold text-primary">
+                                                {{ app.user.totalBorrowings }}
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-book"></i> Emprunts
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {# Active Borrowings #}
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light rounded-lg shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="display-6 fw-bold text-success">
+                                                {{ app.user.activeBorrowings }}
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> En cours
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {# Overdue Borrowings #}
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light rounded-lg shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="display-6 fw-bold {{ app.user.overdueBorrowings > 0 ? 'text-danger' : 'text-secondary' }}">
+                                                {{ app.user.overdueBorrowings }}
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-exclamation-triangle"></i> En retard
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {# Wishlist Items #}
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light rounded-lg shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="display-6 fw-bold text-info">
+                                                {{ app.user.totalWishlistItems }}
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-heart"></i> Souhaits
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {# Reviews #}
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light rounded-lg shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="display-6 fw-bold text-warning">
+                                                {{ app.user.totalReviews }}
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-star"></i> Avis
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {# Average Rating #}
+                                <div class="col-6">
+                                    <div class="card border-0 bg-light rounded-lg shadow-sm">
+                                        <div class="card-body text-center p-3">
+                                            <div class="display-6 fw-bold text-warning">
+                                                {{ app.user.averageReviewRating|default('—') }}
+                                                {% if app.user.totalReviews > 0 %}
+                                                    <small>/5</small>
+                                                {% endif %}
+                                            </div>
+                                            <small class="text-muted">
+                                                <i class="fas fa-rating"></i> Note moyenne
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
+                    {# Quick Actions #}
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <a href="{{ path('app_user_emprunts') }}" class="btn btn-primary w-100">
+                                <i class="fas fa-book-open"></i> Mes emprunts
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ path('app_user_wishlist') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-heart"></i> Ma liste de souhaits
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{{ path('app_user_catalog') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-search"></i> Parcourir
+                            </a>
+                        </div>
+                    </div>
+
+                    {% if app.user.overdueBorrowings > 0 %}
+                        <div class="alert alert-danger mb-4">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Attention !</strong> Vous avez {{ app.user.overdueBorrowings }} livre(s) en retard.
+                            <a href="{{ path('app_user_emprunts') }}" class="alert-link">Consultez votre liste</a>
+                        </div>
+                    {% endif %}
+
+                    <hr class="my-5">
+
+                    {# Logout Button #}
+                    <div class="text-center">
+                        <a href="{{ path('app_logout') }}" class="btn btn-outline-danger btn-lg">
+                            <i class="fas fa-sign-out-alt"></i> Déconnexion
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

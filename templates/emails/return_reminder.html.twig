@@ -1,0 +1,43 @@
+{# Return Reminder Email #}
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+<div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h2 style="color: #5b6cf0; margin: 0 0 10px 0; font-size: 24px;">
+        <i style="font-family: monospace;">⏰</i> Rappel de retour
+    </h2>
+    <p style="color: #64748b; margin: 0; font-size: 14px;">
+        Il vous reste <strong style="color: #f39c12;">{{ daysRemaining }} jour(s)</strong> pour retourner votre livre
+    </p>
+</div>
+
+<p style="color: #334155; line-height: 1.6;">
+    Bonjour {{ user.firstName }},
+</p>
+
+<p style="color: #334155; line-height: 1.6;">
+    Ceci est un rappel amical que vous devez retourner le livre suivant à la bibliothèque avant le 
+    <strong style="color: #5b6cf0;">{{ emprunt.dateRetourPrevue|date('d/m/Y') }}</strong> :
+</p>
+
+<div style="background-color: #f0f2ff; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #5b6cf0;">
+    <p style="margin: 0 0 8px 0; color: #334155;">
+        <strong style="font-size: 16px;">📖 {{ livre.titre }}</strong>
+    </p>
+    <p style="margin: 0 0 5px 0; color: #64748b; font-size: 14px;">
+        Auteur(s): {{ livre.auteurs|map(a => a.nom)|join(', ') }}
+    </p>
+    <p style="margin: 0; color: #64748b; font-size: 14px;">
+        Emprunt du: {{ emprunt.dateEmprunt|date('d/m/Y') }}
+    </p>
+</div>
+
+<p style="color: #334155; line-height: 1.6;">
+    Pour renvoyer ce livre, accédez simplement à votre compte utilisateur et cliquez sur le bouton "Rendre".
+</p>
+
+<p style="color: #64748b; line-height: 1.6; font-size: 14px;">
+    Merci de votre attention et profitez de votre lecture ! 📚
+</p>
+
+{% endblock %}

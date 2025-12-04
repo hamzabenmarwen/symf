@@ -1,0 +1,111 @@
+{# templates/user/search.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche - Bibliothèque{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">
+            <i class="fas fa-home"></i> Accueil
+        </a>
+        <a href="{{ path('app_user_catalog') }}" class="btn btn-outline-primary ms-2">
+            <i class="fas fa-book"></i> Catalogue
+        </a>
+    </div>
+
+    <h1 class="text-center display-5 fw-bold mb-5">
+        <i class="fas fa-search text-primary"></i> Rechercher un livre
+    </h1>
+
+    {# FORMULAIRE DE RECHERCHE #}
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-8">
+            <form method="get" action="{{ path('app_catalog_search') }}">
+                <div class="d-flex gap-2">
+                    <input 
+                        type="text" 
+                        name="q" 
+                        class="form-control form-control-lg" 
+                        placeholder="Rechercher par titre, auteur, ISBN, éditeur ou catégorie..."
+                        value="{{ query }}"
+                        autofocus
+                    >
+                    <button class="btn btn-primary btn-lg" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {# RÉSULTATS #}
+    {% if query %}
+        <div class="card shadow-lg">
+            <div class="card-header">
+                <h3 class="mb-0 d-flex gap-3 align-items-center">
+                    <i class="fas fa-list"></i>
+                    Résultats de recherche
+                    <span class="badge bg-light text-primary fs-6">{{ resultats|length }}</span>
+                </h3>
+                <p class="mb-0 mt-3 opacity-75">Recherche pour : <strong>"{{ query }}"</strong></p>
+            </div>
+            <div class="card-body">
+                {% if resultats is empty %}
+                    <div class="alert alert-warning text-center m-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Aucun résultat trouvé pour "<strong>{{ query }}</strong>"
+                    </div>
+                {% else %}
+                    <div class="row g-4">
+                        {% for livre in resultats %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card h-100 book-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary fw-bold">
+                                            {{ livre.titre }}
+                                        </h5>
+                                        <p class="card-text small">
+                                            <div class="mb-2">
+                                                <i class="fas fa-user text-muted"></i> 
+                                                <span class="text-muted">{{ livre.auteurs|map(a => a.nom)|join(', ') }}</span>
+                                            </div>
+                                            <div class="mb-2">
+                                                <i class="fas fa-tag text-muted"></i>
+                                                <span class="text-muted">{{ livre.no.designation }}</span>
+                                            </div>
+                                            <div>
+                                                <i class="fas fa-building text-muted"></i>
+                                                <span class="text-muted">{{ livre.editeur.nom }}</span>
+                                            </div>
+                                        </p>
+                                        <div class="mb-3">
+                                            {% if livre.qte > 0 %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> {{ livre.qte }} disponible(s)
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times"></i> Indisponible
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        <a href="{{ path('app_user_livre_detail', {id: livre.id}) }}" class="btn btn-primary btn-sm w-100">
+                                            <i class="fas fa-eye"></i> Voir détails
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center text-muted">
+            <i class="fas fa-info-circle fa-3x mb-3"></i>
+            <p class="fs-5">Entrez un terme de recherche pour trouver des livres</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

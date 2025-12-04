@@ -1,0 +1,48 @@
+{# Welcome Email #}
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+<div style="background-color: #f0f2ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #5b6cf0;">
+    <h2 style="color: #5b6cf0; margin: 0 0 10px 0; font-size: 24px;">
+        <i style="font-family: monospace;">🎉</i> Bienvenue !
+    </h2>
+    <p style="color: #5b6cf0; margin: 0; font-size: 14px;">
+        Nous sommes heureux de vous compter parmi nos membres !
+    </p>
+</div>
+
+<p style="color: #334155; line-height: 1.6;">
+    Bonjour {{ user.firstName }},
+</p>
+
+<p style="color: #334155; line-height: 1.6;">
+    Bienvenue à la Bibliothèque ! Vous avez maintenant accès à notre collection complète de livres.
+</p>
+
+<h3 style="color: #334155; margin: 24px 0 12px 0; font-size: 16px;">
+    🚀 Premiers pas
+</h3>
+
+<ul style="color: #334155; line-height: 1.8;">
+    <li><strong>Parcourir le catalogue :</strong> Découvrez nos milliers de livres</li>
+    <li><strong>Emprunter un livre :</strong> Cliquez sur "Emprunter" pour ajouter un livre à votre collection</li>
+    <li><strong>Ajouter à votre liste de souhaits :</strong> Marquez les livres que vous souhaitez lire</li>
+    <li><strong>Laisser un avis :</strong> Partagez vos critiques et aidez les autres lecteurs</li>
+    <li><strong>Consulter vos emprunts :</strong> Accédez à votre compte pour voir vos emprunts actifs et l'historique</li>
+</ul>
+
+<h3 style="color: #334155; margin: 24px 0 12px 0; font-size: 16px;">
+    📋 Informations utiles
+</h3>
+
+<p style="color: #334155; line-height: 1.6;">
+    <strong>Durée d'emprunt :</strong> 14 jours par défaut<br>
+    <strong>Nombre de livres :</strong> Emprunts illimités<br>
+    <strong>Renouvellement :</strong> Possible via votre compte (sauf demande de renouvellement)
+</p>
+
+<p style="color: #64748b; font-size: 14px; line-height: 1.6; margin-top: 24px;">
+    Des questions ? Consultez notre page d'aide ou contactez notre équipe support.
+</p>
+
+{% endblock %}

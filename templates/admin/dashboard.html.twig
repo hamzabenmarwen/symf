@@ -1,0 +1,265 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+
+{% block content_title %}📊 Tableau de Bord{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    {# Key Statistics Row #}
+    <div class="row mb-4">
+        {# Books #}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1"><i class="fas fa-book"></i> Livres</p>
+                            <h3 class="mb-2">{{ stats.books.total }}</h3>
+                            <small class="text-success"><i class="fas fa-check"></i> {{ stats.books.available }} disponibles</small>
+                            <br>
+                            <small class="text-danger"><i class="fas fa-times"></i> {{ stats.books.unavailable }} indisponibles</small>
+                        </div>
+                        <div style="font-size: 32px; color: #5b6cf0; opacity: 0.2;">
+                            <i class="fas fa-book"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Users #}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1"><i class="fas fa-users"></i> Utilisateurs</p>
+                            <h3 class="mb-2">{{ stats.users.total }}</h3>
+                            <small class="text-primary"><i class="fas fa-crown"></i> {{ stats.users.admins }} admin{{ stats.users.admins > 1 ? 's' : '' }}</small>
+                            <br>
+                            <small class="text-info"><i class="fas fa-user"></i> {{ stats.users.regularUsers }} régulier{{ stats.users.regularUsers > 1 ? 's' : '' }}</small>
+                        </div>
+                        <div style="font-size: 32px; color: #3498db; opacity: 0.2;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Borrowings #}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1"><i class="fas fa-exchange-alt"></i> Emprunts</p>
+                            <h3 class="mb-2">{{ stats.borrowings.total }}</h3>
+                            <small class="text-success"><i class="fas fa-clock"></i> {{ stats.borrowings.active }} en cours</small>
+                            <br>
+                            <small class="text-danger"><i class="fas fa-exclamation"></i> {{ stats.borrowings.overdue }} en retard</small>
+                        </div>
+                        <div style="font-size: 32px; color: #2ecc71; opacity: 0.2;">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Secondary Statistics Row #}
+    <div class="row mb-4">
+        {# Reviews #}
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <p class="text-muted mb-1"><i class="fas fa-star"></i> Avis</p>
+                    <h4 class="mb-2">{{ stats.reviews.total }}</h4>
+                    <div class="text-warning">
+                        {% for i in 1..5 %}
+                            {% if i <= stats.reviews.averageRating|round %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <small class="text-muted">({{ stats.reviews.averageRating }}/5)</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Return Rate #}
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <p class="text-muted mb-1"><i class="fas fa-check-circle"></i> Taux de retour</p>
+                    <h4 class="mb-2">{{ returnRate.onTimePercentage }}%</h4>
+                    <div class="progress" style="height: 5px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ returnRate.onTimePercentage }}%"></div>
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ returnRate.latePercentage }}%"></div>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        <span class="text-success">✓ À temps: {{ returnRate.onTime }}</span> | 
+                        <span class="text-danger">✗ En retard: {{ returnRate.late }}</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        {# Borrowing Rate #}
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <p class="text-muted mb-1"><i class="fas fa-percentage"></i> Taux actif</p>
+                    <h4 class="mb-0">{{ stats.borrowings.borrowingRate }}%</h4>
+                    <small class="text-muted">des emprunts en cours</small>
+                </div>
+            </div>
+        </div>
+
+        {# Completed Borrowings #}
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center">
+                    <p class="text-muted mb-1"><i class="fas fa-history"></i> Complétés</p>
+                    <h4 class="mb-0">{{ stats.borrowings.completed }}</h4>
+                    <small class="text-muted">emprunts retournés</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Top Books & Users #}
+    <div class="row mb-4">
+        {# Top Books #}
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-fire"></i> Top Livres les plus empruntés</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.topBooks|length > 0 %}
+                        <table class="table table-sm table-hover mb-0">
+                            <tbody>
+                                {% for book in stats.topBooks %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary">{{ loop.index }}</span>
+                                            {{ book.titre[:40]}}{% if book.titre|length > 40 %}...{% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <strong class="text-primary">{{ book.borrowCount }}</strong>
+                                            <small class="text-muted">emprunt{{ book.borrowCount > 1 ? 's' : '' }}</small>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted text-center mb-0"><i class="fas fa-inbox"></i> Aucune donnée</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# Top Users #}
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-trophy"></i> Utilisateurs les plus actifs</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.topUsers|length > 0 %}
+                        <table class="table table-sm table-hover mb-0">
+                            <tbody>
+                                {% for user in stats.topUsers %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-info">{{ loop.index }}</span>
+                                            {% set displayName = user.firstName ?: user.email %}
+                                            {{ displayName[:25]}}{% if displayName|length > 25 %}...{% endif %}
+                                        </td>
+                                        <td class="text-end">
+                                            <strong class="text-success">{{ user.borrowCount }}</strong>
+                                            <small class="text-muted">emprunt{{ user.borrowCount > 1 ? 's' : '' }}</small>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted text-center mb-0"><i class="fas fa-inbox"></i> Aucune donnée</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Recent Borrowings #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Emprunts récents</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if stats.recentBorrowings|length > 0 %}
+                        <table class="table table-hover table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Livre</th>
+                                    <th>Utilisateur</th>
+                                    <th>Date d'emprunt</th>
+                                    <th>À retourner avant</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for borrowing in stats.recentBorrowings|slice(0, 10) %}
+                                    {% set now = date() %}
+                                    {% set enRetard = now > date(borrowing.dateRetourPrevue) and borrowing.dateRetourEffective is null %}
+                                    <tr class="{% if enRetard %}table-danger{% endif %}">
+                                        <td>{{ borrowing.livre.titre[:30]}}{% if borrowing.livre.titre|length > 30 %}...{% endif %}</td>
+                                        <td>{{ borrowing.utilisateur.firstName ?: borrowing.utilisateur.email }}</td>
+                                        <td>{{ borrowing.dateEmprunt|date('d/m/Y H:i') }}</td>
+                                        <td>{{ borrowing.dateRetourPrevue|date('d/m/Y') }}</td>
+                                        <td>
+                                            {% if borrowing.dateRetourEffective is not null %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Retourné
+                                                </span>
+                                            {% elseif enRetard %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-exclamation-triangle"></i> En retard
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-info">
+                                                    <i class="fas fa-clock"></i> En cours
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-muted text-center py-4 mb-0"><i class="fas fa-inbox"></i> Aucun emprunt</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

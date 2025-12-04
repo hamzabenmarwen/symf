@@ -1,0 +1,300 @@
+{# templates/user/livre_detail.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ livre.titre }} - Bibliothèque{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+        <a href="{{ path('app_home') }}" class="btn btn-outline-primary">
+            <i class="fas fa-home"></i> Accueil
+        </a>
+        <a href="{{ path('app_user_catalog') }}" class="btn btn-outline-primary ms-2">
+            <i class="fas fa-arrow-left"></i> Retour au catalogue
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0">
+        <div class="card-header bg-gradient text-white text-center py-4" style="background: linear-gradient(135deg, #5b6cf0, #4a59d6);">
+            <h1 class="display-5 fw-bold mb-0">{{ livre.titre }}</h1>
+        </div>
+
+        <div class="card-body p-4 p-md-5">
+            <!-- Header Info Row -->
+            <div class="book-info-row mb-5 pb-4 border-bottom">
+                <div class="info-box">
+                    <small class="text-muted d-block">Auteur(s)</small>
+                    <p class="fw-bold mb-0">{{ livre.auteurs|map(a => a.nom)|join(', ') }}</p>
+                </div>
+                <div class="info-box">
+                    <small class="text-muted d-block">Éditeur</small>
+                    <p class="fw-bold mb-0">{{ livre.editeur.nom }}</p>
+                </div>
+                <div class="info-box">
+                    <small class="text-muted d-block">Catégorie</small>
+                    <p class="fw-bold mb-0"><span class="badge bg-primary">{{ livre.no.designation }}</span></p>
+                </div>
+                <div class="info-box">
+                    <small class="text-muted d-block">Publication</small>
+                    <p class="fw-bold mb-0">{{ livre.datepub|date('d/m/Y') }}</p>
+                </div>
+                <div class="info-box">
+                    <small class="text-muted d-block">ISBN</small>
+                    <p class="fw-bold mb-0 font-monospace small">{{ livre.isbn }}</p>
+                </div>
+            </div>
+
+            <!-- Main Content Row -->
+            <div class="row g-5">
+                <div class="col-lg-7">
+                    {% if livre.description %}
+                        <h4 class="text-primary fw-bold mb-3"><i class="fas fa-book-open"></i> Description</h4>
+                        <p class="text-muted lh-lg">{{ livre.description }}</p>
+                    {% else %}
+                        <div class="alert alert-info mb-0">Aucune description disponible</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-lg-5">
+                    <!-- Availability Card -->
+                    <div class="card shadow-md mb-4">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-3"><i class="fas fa-box"></i> Disponibilité</h5>
+                            <div class="p-4 rounded mb-3 {% if livre.qte > 0 %}bg-success text-white{% else %}bg-danger text-white{% endif %}">
+                                <div class="display-5 fw-bold mb-2">{{ livre.qte }}</div>
+                                <p class="mb-0 fs-6">
+                                    exemplaire{{ livre.qte > 1 ? 's' }} disponible{{ livre.qte > 1 ? 's' : '' }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Price Card -->
+                    <div class="card shadow-md mb-4">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-3"><i class="fas fa-tag"></i> Prix</h5>
+                            <h3 class="text-success fw-bold mb-0">{{ livre.prixunitaire|number_format(0) }} DT</h3>
+                        </div>
+                    </div>
+
+                    <!-- RATING DISPLAY -->
+                    {% if livre.averageRating %}
+                        <div class="p-3 bg-light rounded mb-4 text-center">
+                            <small class="text-muted">Avis des lecteurs</small>
+                            <div class="text-warning my-2">
+                                {% for i in 1..5 %}
+                                    {% if i <= livre.averageRating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <p class="mb-0"><strong>{{ livre.averageRating|number_format(1) }}/5</strong> ({{ livre.ratingCount }} avis)</p>
+                        </div>
+                    {% endif %}
+
+                    {# === BOUTON EMPRUNT INTELLIGENT === #}
+                    {% if app.user %}
+                        {% if livre.qte > 0 %}
+                            <form method="post" action="{{ path('app_livre_emprunter', {id: livre.id}) }}" class="mb-3">
+                                <input type="hidden" name="_token" value="{{ csrf_token('emprunter' ~ livre.id) }}">
+                                <button type="submit" class="btn btn-success btn-lg w-100 shadow">
+                                    <i class="fas fa-book-reader"></i> Emprunter ce livre
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-secondary btn-lg w-100 mb-3" disabled>
+                                <i class="fas fa-lock"></i> Livre indisponible
+                            </button>
+                        {% endif %}
+
+                        <!-- WISHLIST BUTTON -->
+                        {% if isInWishlist %}
+                            <form method="POST" action="{{ path('app_livre_wishlist_remove', {id: livre.id}) }}" style="margin-bottom: 1rem;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('wishlist-remove-' ~ livre.id) }}">
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="fas fa-heart"></i> Retirer de mes souhaits
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{{ path('app_livre_wishlist_add', {id: livre.id}) }}" style="margin-bottom: 1rem;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('wishlist-' ~ livre.id) }}">
+                                <button type="submit" class="btn btn-outline-primary w-100">
+                                    <i class="far fa-heart"></i> Ajouter à mes souhaits
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <a href="{{ path('app_user_wishlist') }}" class="btn btn-light w-100 btn-sm">
+                            <i class="fas fa-list"></i> Ma liste de souhaits
+                        </a>
+                    {% else %}
+                        <div class="text-center">
+                            <p class="text-muted mb-3">Connectez-vous pour emprunter ce livre</p>
+                            <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg w-100">
+                                <i class="fas fa-sign-in-alt"></i> Se connecter
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- REVIEWS SECTION -->
+            <div class="mt-5 pt-5 border-top">
+                <h3 class="text-primary fw-bold mb-4"><i class="fas fa-comments"></i> Avis des lecteurs</h3>
+
+                <!-- ADD REVIEW FORM -->
+                {% if app.user %}
+                    <div class="card mb-5 bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Laisser un avis</h5>
+                            <form method="POST" action="{{ path('app_livre_avis_add', {id: livre.id}) }}" id="reviewForm">
+                                <input type="hidden" name="_token" value="{{ csrf_token('avis-' ~ livre.id) }}">
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Note (1-5 étoiles)</label>
+                                    <div class="rating-input">
+                                        <input type="radio" name="rating" value="5" id="rating5" checked>
+                                        <label for="rating5"><i class="fas fa-star"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="4" id="rating4">
+                                        <label for="rating4"><i class="fas fa-star"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="3" id="rating3">
+                                        <label for="rating3"><i class="fas fa-star"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="2" id="rating2">
+                                        <label for="rating2"><i class="fas fa-star"></i></label>
+                                        
+                                        <input type="radio" name="rating" value="1" id="rating1">
+                                        <label for="rating1"><i class="fas fa-star"></i></label>
+                                    </div>
+                                    <small class="text-muted d-block mt-2 text-center">Note sélectionnée : <span id="selectedRating">5</span>/5</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label">Commentaire (optionnel)</label>
+                                    <textarea name="comment" id="comment" class="form-control" rows="3" placeholder="Partage votre opinion..."></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Envoyer mon avis
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- REVIEWS LIST -->
+                {% if reviews|length > 0 %}
+                    <div class="row">
+                        {% for review in reviews %}
+                            <div class="col-md-6 mb-4">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div class="text-warning">
+                                                {% for i in 1..5 %}
+                                                    {% if i <= review.rating %}
+                                                        <i class="fas fa-star"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                            <small class="text-muted">{{ review.createdAt|date('d/m/Y') }}</small>
+                                        </div>
+                                        <h6 class="fw-bold">{{ review.utilisateur.email }}</h6>
+                                        {% if review.comment %}
+                                            <p class="text-muted small">{{ review.comment }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        <p class="mb-0">Aucun avis pour le moment. Soyez le premier à partager votre opinion !</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-input {
+    display: flex;
+    justify-content: center;
+    font-size: 2rem;
+    gap: 5px;
+}
+
+.rating-input input[type="radio"] {
+    display: none;
+}
+
+.rating-input label {
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+/* Hover effect - highlight star and all stars before it */
+.rating-input label:hover,
+.rating-input label:hover ~ label {
+    color: #ffc107;
+}
+
+/* Checked stars - highlight selected star and all stars before it */
+.rating-input input[type="radio"]:checked ~ label {
+    color: #ffc107;
+}
+
+/* Make sure the checked star itself is also highlighted */
+.rating-input input[type="radio"]:checked + label {
+    color: #ffc107;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingInputs = document.querySelectorAll('.rating-input input[type="radio"]');
+    const selectedRatingSpan = document.getElementById('selectedRating');
+    
+    // Update selected rating display
+    ratingInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            selectedRatingSpan.textContent = this.value;
+            
+            // Debug: log the selected value
+            console.log('Rating selected:', this.value);
+        });
+        
+        // Set initial display for checked input
+        if (input.checked) {
+            selectedRatingSpan.textContent = input.value;
+        }
+    });
+    
+    // Debug form submission
+    const reviewForm = document.getElementById('reviewForm');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            const selectedRating = document.querySelector('input[name="rating"]:checked');
+            console.log('Form submitting rating:', selectedRating ? selectedRating.value : 'none');
+            
+            // Force the rating value to be included in form data
+            if (!selectedRating) {
+                // Ensure at least one rating is selected
+                e.preventDefault();
+                alert('Veuillez sélectionner une note.');
+                return;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catalogue - Bibliothèque{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-4 text-primary">Catalogue de la Bibliothèque</h1>
+        <p class="lead text-muted">Découvrez tous nos ouvrages disponibles</p>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="card mb-5 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-4"><i class="fas fa-filter"></i> Filtres</h5>
+            <form method="GET" class="filters-form">
+                <div class="filter-item">
+                    <label class="form-label">Catégorie</label>
+                    <select name="categorie" class="form-select">
+                        <option value="">Toutes</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if filterCategorie == cat.id %}selected{% endif %}>
+                                {{ cat.designation }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="form-label">Auteur</label>
+                    <select name="auteur" class="form-select">
+                        <option value="">Tous</option>
+                        {% for aut in auteurs %}
+                            <option value="{{ aut.id }}" {% if filterAuteur == aut.id %}selected{% endif %}>
+                                {{ aut.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="form-label">Éditeur</label>
+                    <select name="editeur" class="form-select">
+                        <option value="">Tous</option>
+                        {% for ed in editeurs %}
+                            <option value="{{ ed.id }}" {% if filterEditeur == ed.id %}selected{% endif %}>
+                                {{ ed.nom }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label class="form-label">Trier par</label>
+                    <select name="sort" class="form-select">
+                        <option value="datepub" {% if sortBy == 'datepub' %}selected{% endif %}>Publication</option>
+                        <option value="titre" {% if sortBy == 'titre' %}selected{% endif %}>Titre</option>
+                        <option value="prixunitaire" {% if sortBy == 'prixunitaire' %}selected{% endif %}>Prix</option>
+                        <option value="averageRating" {% if sortBy == 'averageRating' %}selected{% endif %}>Avis</option>
+                    </select>
+                </div>
+                <div class="filter-buttons">
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Appliquer</button>
+                    <a href="{{ path('app_user_catalog') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- RESULTS INFO -->
+    <div class="alert alert-info mb-4">
+        <i class="fas fa-info-circle"></i> <strong>{{ totalCount }}</strong> livre(s) trouvé(s)
+    </div>
+
+    <!-- BOOKS GRID -->
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
+        {% for livre in livres %}
+            <div class="col">
+                <div class="card book-card h-100 shadow-sm hover-shadow">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-primary">{{ livre.titre }}</h5>
+                        <p class="text-muted small flex-grow-1">
+                            <strong>Auteur(s) :</strong><br>
+                            {{ livre.auteurs|map(a => a.nom)|join(', ') ?: 'Non spécifié' }}
+                        </p>
+                        
+                        <!-- RATING -->
+                        {% if livre.averageRating %}
+                            <div class="mb-2">
+                                <small class="text-warning">
+                                    {% for i in 1..5 %}
+                                        {% if i <= livre.averageRating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    ({{ livre.ratingCount }} avis)
+                                </small>
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-3">
+                            <p class="h5 text-success fw-bold">{{ livre.prixunitaire|number_format(0) }} DT</p>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="small text-muted">Stock :</span>
+                                {% if livre.qte > 0 %}
+                                    <span class="badge bg-success rounded-pill">{{ livre.qte }} ex.</span>
+                                {% else %}
+                                    <span class="badge bg-danger rounded-pill">Épuisé</span>
+                                {% endif %}
+                            </div>
+                            <a href="{{ path('app_user_livre_detail', {id: livre.id}) }}" 
+                               class="btn btn-primary w-100 btn-sm">
+                                <i class="fas fa-eye"></i> Voir Détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12 text-center py-5">
+                <p class="text-muted fs-3">Aucun livre trouvé dans le catalogue.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- PAGINATION -->
+    {% if totalPages > 1 %}
+        <nav aria-label="Pagination">
+            <ul class="pagination justify-content-center">
+                {% if currentPage > 1 %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if filterCategorie %}&categorie={{ filterCategorie }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i> Première
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ currentPage - 1 }}{% if filterCategorie %}&categorie={{ filterCategorie }}{% endif %}">
+                            Précédente
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% set start = max(1, currentPage - 2) %}
+                {% set end = min(totalPages, currentPage + 2) %}
+
+                {% if start > 1 %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {% for page in start..end %}
+                    <li class="page-item {% if page == currentPage %}active{% endif %}">
+                        <a class="page-link" href="?page={{ page }}{% if filterCategorie %}&categorie={{ filterCategorie }}{% endif %}">
+                            {{ page }}
+                        </a>
+                    </li>
+                {% endfor %}
+
+                {% if end < totalPages %}
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% endif %}
+
+                {% if currentPage < totalPages %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ currentPage + 1 }}{% if filterCategorie %}&categorie={{ filterCategorie }}{% endif %}">
+                            Suivante
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ totalPages }}{% if filterCategorie %}&categorie={{ filterCategorie }}{% endif %}">
+                            Dernière <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+</div>
+
+<style>
+    .hover-shadow {
+        transition: box-shadow 0.3s ease;
+    }
+    .hover-shadow:hover {
+        box-shadow: 0 8px 16px rgba(0,0,0,0.15) !important;
+    }
+</style>
+{% endblock %}

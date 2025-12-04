@@ -1,0 +1,50 @@
+{# Overdue Notice Email #}
+{% extends 'emails/base.html.twig' %}
+
+{% block content %}
+<div style="background-color: #fee2e2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #e74c3c;">
+    <h2 style="color: #c0392b; margin: 0 0 10px 0; font-size: 24px;">
+        <i style="font-family: monospace;">⚠️</i> Livre en retard
+    </h2>
+    <p style="color: #c0392b; margin: 0; font-size: 14px; font-weight: bold;">
+        Action requise : Veuillez retourner votre livre dès que possible
+    </p>
+</div>
+
+<p style="color: #334155; line-height: 1.6;">
+    Bonjour {{ user.firstName }},
+</p>
+
+<p style="color: #334155; line-height: 1.6;">
+    <strong>Nous constatons que vous avez un livre en retard à la bibliothèque.</strong> 
+    Ce livre est maintenant en retard de <strong style="color: #e74c3c;">{{ daysOverdue }} jour(s)</strong>.
+</p>
+
+<div style="background-color: #fff5f5; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #e74c3c;">
+    <p style="margin: 0 0 8px 0; color: #334155;">
+        <strong style="font-size: 16px;">📖 {{ livre.titre }}</strong>
+    </p>
+    <p style="margin: 0 0 5px 0; color: #64748b; font-size: 14px;">
+        Auteur(s): {{ livre.auteurs|map(a => a.nom)|join(', ') }}
+    </p>
+    <p style="margin: 0 0 5px 0; color: #64748b; font-size: 14px;">
+        Date prévue du retour: {{ emprunt.dateRetourPrevue|date('d/m/Y') }}
+    </p>
+    <p style="margin: 0; color: #c0392b; font-weight: bold; font-size: 14px;">
+        Retard: {{ daysOverdue }} jour(s)
+    </p>
+</div>
+
+<p style="color: #334155; line-height: 1.6;">
+    Veuillez retourner ce livre à la bibliothèque dans les prochains jours. Si vous ne pouvez pas retourner le livre, 
+    veuillez contacter immédiatement notre équipe.
+</p>
+
+<p style="color: #64748b; font-size: 14px; line-height: 1.6;">
+    <strong>Horaires d'ouverture:</strong><br>
+    Lundi - Vendredi: 9h - 18h<br>
+    Samedi: 10h - 16h<br>
+    Fermé le dimanche
+</p>
+
+{% endblock %}

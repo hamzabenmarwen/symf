@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}S'inscrire - Bibliothèque{% endblock %}
+
+{% block body %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 90px);">
+    <div class="card shadow-lg" style="max-width: 480px; width: 100%; border-radius: 16px;">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <h1 class="h3 mb-2 fw-bold">Créer un compte</h1>
+                <p class="text-muted">Rejoignez notre communauté de lecteurs</p>
+            </div>
+
+            {{ form_start(registrationForm, {'attr': {'class': ''}}) }}
+                {% if form_errors(registrationForm) %}
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle"></i>
+                        {{ form_errors(registrationForm) }}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    {{ form_label(registrationForm.email, 'Adresse Email', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.email, {'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Entrez votre email'
+                    }}) }}
+                    {% if registrationForm.email.vars.errors %}
+                        <div class="form-error"><i class="fas fa-exclamation-triangle"></i> {{ form_errors(registrationForm.email) }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(registrationForm.plainPassword, {'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Créez un mot de passe sécurisé'
+                    }}) }}
+                    {% if registrationForm.plainPassword.vars.errors %}
+                        <div class="form-error"><i class="fas fa-exclamation-triangle"></i> {{ form_errors(registrationForm.plainPassword) }}</div>
+                    {% endif %}
+                    <div class="password-hint">
+                        <i class="fas fa-info-circle"></i> Minimum 8 caractères avec majuscules, minuscules, chiffres
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-check">
+                        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                        <label for="{{ registrationForm.agreeTerms.vars.id }}" class="form-check-label">
+                            J'accepte les <a href="#" class="text-primary">Conditions d'utilisation</a> et la <a href="#" class="text-primary">Politique de confidentialité</a>
+                        </label>
+                    </div>
+                    {% if registrationForm.agreeTerms.vars.errors %}
+                        <div class="form-error mt-2"><i class="fas fa-exclamation-triangle"></i> {{ form_errors(registrationForm.agreeTerms) }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 mt-4">
+                    <i class="fas fa-user-plus"></i> Créer mon compte
+                </button>
+            {{ form_end(registrationForm) }}
+
+            <div class="text-center pt-4 border-top">
+                <p class="text-muted">Vous avez déjà un compte ? <a href="{{ path('app_login') }}" class="fw-semibold">Se connecter</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
