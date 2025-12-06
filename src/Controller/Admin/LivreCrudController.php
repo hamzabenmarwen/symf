@@ -10,6 +10,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\ImageField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
 
 class LivreCrudController extends AbstractCrudController
 {
@@ -26,6 +28,13 @@ class LivreCrudController extends AbstractCrudController
             MoneyField::new('prixunitaire', 'Prix unitaire')->setCurrency('EUR'),
             TextField::new('isbn', 'ISBN'),
             DateField::new('datepub', 'Date de publication'),
+            
+            ImageField::new('coverImage', 'Couverture')
+                ->setBasePath('/uploads/book_covers')
+                ->setUploadDir('public/uploads/book_covers')
+                ->setUploadedFileNamePattern('[slug]-[timestamp].[extension]'),
+            
+            TextEditorField::new('description', 'Description'),
 
             AssociationField::new('auteurs', 'Auteurs'),
             AssociationField::new('editeur', 'Éditeur'),
